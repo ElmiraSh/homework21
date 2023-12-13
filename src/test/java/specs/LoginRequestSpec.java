@@ -22,5 +22,14 @@ public class LoginRequestSpec {
         .log(LogDetail.BODY)
         .expectStatusCode(200)
         .build();
-
+    public static ResponseSpecification unsuccessfulLoginResponseSpec = new ResponseSpecBuilder()
+            .log(LogDetail.STATUS)
+            .log(LogDetail.BODY)
+            .expectStatusCode(400)
+            .build();
+    public static ResponseSpecification succesfulRegistration = new ResponseSpecBuilder()
+            .log(LogDetail.STATUS)
+            .log(LogDetail.BODY)
+            .expectStatusCode(201)
+            .build();
 }

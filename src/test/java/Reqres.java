@@ -1,13 +1,12 @@
 
-import models.LoginBodyModel;
-import models.LoginResponseModel;
 import org.junit.jupiter.api.Test;
+
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static specs.LoginRequestSpec.loginRequestSpec;
-import static specs.LoginRequestSpec.loginResponseSpec;
+import static specs.LoginRequestSpec.*;
 
 public class Reqres {
     @Test
@@ -31,95 +30,96 @@ public class Reqres {
 
     }
 
+    @Test
+    public void unsuccesfulLoginTest() {
+        LoginUnsuccefulBody request = new LoginUnsuccefulBody();
+        request.setEmail("sydney@fife");
 
-    ////////////////////////////////
-//    @Test
-//    void unsuccesfulLoginTest() {
-//        String authBody = "{\n" +
-//                "    \"email\": \"eve.holt@reqres.in\"}";
-//        given()
-//                .log().uri()
-//                .log().method()
-//                .log().body()
-//                .body(authBody)
-//                .contentType(JSON)
-//                .when()
-//                .post("https://reqres.in/api/login")
-//                .then()
-//                .log().status()
-//                .log().body()
-//                .statusCode(400)
-//                .body("error", is("Missing password"));
-//
-//    }
+        LoginUnsuccesfullResponce response = step("Make login requests", () ->
+                given(loginRequestSpec)
+                        .body(request)
+                        .contentType(JSON)
+                        .when()
+                        .post("https://reqres.in/api/register")
+                        .then()
+                        .spec(unsuccessfulLoginResponseSpec)
+                        .extract().as(LoginUnsuccesfullResponce.class));
 
-//    @Test
-//    void succesfulRegisterlLoginTest() {
-//        String authBody = "{\n" +
-//                "    \"email\": \"eve.holt@reqres.in\",\n" +
-//                "    \"password\": \"pistol\"\n" +
-//                "}";
-//        given()
-//                .log().uri()
-//                .log().method()
-//                .log().body()
-//                .body(authBody)
-//                .contentType(JSON)
-//                .when()
-//                .post("https://reqres.in/api/register")
-//                .then()
-//                .log().status()
-//                .log().body()
-//                .statusCode(200)
-//                .body("id", is(4))
-//                .body("token", is("QpwL5tke4Pnpja7X4"));
-//
-//    }
-//
-//    @Test
-//    void unsuccesfulRegisterlLoginTest() {
-//        String authBody = "{\n" +
-//                "    \"email\": \"sydney@fife\"\n" +
-//                "}";
-//        given()
-//                .log().uri()
-//                .log().method()
-//                .log().body()
-//                .body(authBody)
-//                .contentType(JSON)
-//                .when()
-//                .post("https://reqres.in/api/register")
-//                .then()
-//                .log().status()
-//                .log().body()
-//                .statusCode(400)
-//                .body("error", is("Missing password"));
-//
-//
-//    }
-//
-//    @Test
-//    void createTest() {
-//        String authBody = "{\n" +
-//                "    \"name\": \"morpheus\",\n" +
-//                "    \"job\": \"leader\"\n" +
-//                "}";
-//        given()
-//                .log().uri()
-//                .log().method()
-//                .log().body()
-//                .body(authBody)
-//                .contentType(JSON)
-//                .when()
-//                .post("https://reqres.in/api/users")
-//                .then()
-//                .log().status()
-//                .log().body()
-//                .statusCode(201)
-//                .body("name", is("morpheus"))
-//                .body("job", is("leader"));
-//
-//
-//    }
+        step("Verify response", () ->
+                assertEquals("Missing password", response.getError()));
 
+    }
+
+    @Test
+    public void succesfulRegister() {
+        RegisterSuccesfulBody request = new RegisterSuccesfulBody();
+        request.setEmail("eve.holt@reqres.in");
+        request.setPassword("pistol");
+
+        RegisterSuccesfulResponse response = step("Make login requests", () ->
+                given(loginRequestSpec)
+                        .body(request)
+                        .contentType(JSON)
+                        .when()
+                        .post("https://reqres.in/api/register")
+                        .then()
+                        .spec(loginResponseSpec)
+                        .extract().as(RegisterSuccesfulResponse.class));
+
+        step("Verify response", () ->
+                assertAll(
+                        () -> assertEquals("QpwL5tke4Pnpja7X4", response.getToken()),
+                        () -> assertEquals("4", response.getId())));
+
+    }
+
+    @Test
+    public void unsuccesfulRegister() {
+        RegisterUnsuccesfulBody request = new RegisterUnsuccesfulBody();
+        request.setEmail("sydney@fife");
+
+        RegisterUnsuccefulResponse response = step("Make login requests", () ->
+                given(loginRequestSpec)
+                        .body(request)
+                        .contentType(JSON)
+                        .when()
+                        .post("https://reqres.in/api/register")
+                        .then()
+                        .spec(unsuccessfulLoginResponseSpec)
+                        .extract().as(RegisterUnsuccefulResponse.class));
+
+        step("Verify response", () ->
+                assertEquals("Missing password", response.getError()));
+
+    }
+
+    @Test
+    public void succesfulCreateUsers() {
+        CreateUserBody request = new CreateUserBody();
+        request.setName("morpheus");
+        request.setJob("leader");
+
+        CreateUserResponse response = step("Make login requests", () ->
+                given(loginRequestSpec)
+                        .body(request)
+                        .contentType(JSON)
+                        .when()
+                        .post("https://reqres.in/api/users")
+                        .then()
+                        .spec(succesfulRegistration)
+                        .extract().as(CreateUserResponse.class));
+
+
+        step("Verify response", () -> {
+
+            assertEquals("morpheus", response.getName());
+            assertEquals("leader", response.getJob());
+
+        });
+
+    }
 }
+
+
+
+
